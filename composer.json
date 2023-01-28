@@ -1,0 +1,45 @@
+{
+    "name": "beastbytes/phone-number-validator",
+    "type": "library",
+    "description": "National and international phone number validator",
+    "keywords": [
+        "phone number",
+        "validator",
+        "epp",
+        "itu",
+        "itu-t",
+        "E.123",
+        "E.164"
+    ],
+    "support": {
+        "issues": "https://github.com/beastbytes/phone-number-validator/issues",
+        "source": "https://github.com/beastbytes/phone-number-validator"
+    },
+    "license": "BSD-3-Clause",
+    "authors": [{
+        "name": "Chris Yates",
+        "email": "chris.l.yates@gmail.com"
+    }],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^8.0",
+        "yiisoft/validator": "dev-master"
+    },
+    "require-dev": {
+        "beastbytes/n6l-phone-number-data-php": "dev-master",
+        "phpunit/phpunit": "^9.5",
+        "roave/security-advisories": "dev-latest",
+        "vimeo/psalm": "^4.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "BeastBytes\\PhoneNumber\\Validator\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests"
+        }
+    }
+}
