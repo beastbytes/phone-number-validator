@@ -1,18 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" backupGlobals="false" colors="true" verbose="true" bootstrap="vendor/autoload.php" failOnRisky="true" failOnWarning="true">
-    <coverage>
-        <include>
-            <directory>./</directory>
-        </include>
-        <exclude>
-            <directory>./config</directory>
-            <directory>./tests</directory>
-            <directory>./vendor</directory>
-        </exclude>
-    </coverage>
-    <testsuites>
-        <testsuite name="Phone Number Validator tests">
-            <directory>./tests</directory>
-        </testsuite>
-    </testsuites>
+<phpunit
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  colors="true"
+  failOnRisky="true"
+  failOnWarning="true"
+  stopOnFailure="false"
+  executionOrder="random"
+  resolveDependencies="true"
+  xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.2/phpunit.xsd"
+  cacheDirectory=".phpunit.cache"
+>
+  <php>
+    <ini name="error_reporting" value="-1"/>
+  </php>
+
+  <testsuites>
+    <testsuite name="Phone Number Validator tests">
+      <directory suffix=".php">./tests</directory>
+      <exclude>./tests/assets</exclude>
+    </testsuite>
+  </testsuites>
+
+  <coverage/>
+  <source>
+    <include>
+      <directory>./src</directory>
+    </include>
+  </source>
 </phpunit>

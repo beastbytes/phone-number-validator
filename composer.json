@@ -1,45 +1,57 @@
 {
-    "name": "beastbytes/phone-number-validator",
-    "type": "library",
-    "description": "National and international phone number validator",
-    "keywords": [
-        "phone number",
-        "validator",
-        "epp",
-        "itu",
-        "itu-t",
-        "E.123",
-        "E.164"
-    ],
-    "support": {
-        "issues": "https://github.com/beastbytes/phone-number-validator/issues",
-        "source": "https://github.com/beastbytes/phone-number-validator"
-    },
-    "license": "BSD-3-Clause",
-    "authors": [{
-        "name": "Chris Yates",
-        "email": "chris.l.yates@gmail.com"
-    }],
-    "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {
-        "php": "^8.0",
-        "yiisoft/validator": "dev-master"
-    },
-    "require-dev": {
-        "beastbytes/n6l-phone-number-data-php": "dev-master",
-        "phpunit/phpunit": "^9.5",
-        "roave/security-advisories": "dev-latest",
-        "vimeo/psalm": "^4.3"
-    },
-    "autoload": {
-        "psr-4": {
-            "BeastBytes\\PhoneNumber\\Validator\\": "src"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests"
-        }
+  "name": "beastbytes/phone-number-validator",
+  "type": "library",
+  "description": "National and international phone number validator",
+  "keywords": [
+    "phone number",
+    "validator",
+    "epp",
+    "itu",
+    "itu-t",
+    "E.123",
+    "E.164"
+  ],
+  "support": {
+    "issues": "https://github.com/beastbytes/phone-number-validator/issues",
+    "source": "https://github.com/beastbytes/phone-number-validator"
+  },
+  "license": "BSD-3-Clause",
+  "authors": [{
+    "name": "Chris Yates",
+    "email": "chris.l.yates@gmail.com"
+  }],
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "require": {
+    "php": "^8.0",
+    "yiisoft/validator": "^1.0"
+  },
+  "require-dev": {
+    "beastbytes/n6l-phone-number-data-php": "dev-master",
+    "consolidation/robo": "^4.0",
+    "phpunit/phpunit": "^10.0",
+    "roave/infection-static-analysis-plugin": "^1.0",
+    "roave/security-advisories": "dev-latest",
+    "spatie/phpunit-watcher": "^1.0",
+    "vimeo/psalm": "^5.0",
+    "yiisoft/test-support": "^3.0",
+    "yiisoft/translator-message-php": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "BeastBytes\\PhoneNumber\\Validator\\": "src"
     }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "BeastBytes\\PhoneNumber\\Validator\\Tests\\": "tests"
+    }
+  },
+  "scripts": {
+    "infection": "roave-infection-static-analysis-plugin",
+    "psalm": "psalm --config=psalm.xml",
+    "robo": "robo",
+    "test": "phpunit --testdox",
+    "test-watch": "phpunit-watcher watch"
+  }
 }
