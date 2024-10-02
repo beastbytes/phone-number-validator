@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Copyright (c) 2023 BeastBytes - All Rights Reserved
+ * @copyright Copyright (c) 2024 BeastBytes - All Rights Reserved
  * @license BSD 3-Clause
  */
 
@@ -13,6 +13,7 @@ use RuntimeException;
 use Yiisoft\Validator\Exception\UnexpectedRuleException;
 use Yiisoft\Validator\Result;
 use Yiisoft\Validator\RuleHandlerInterface;
+use Yiisoft\Validator\RuleInterface;
 use Yiisoft\Validator\ValidationContext;
 
 /**
@@ -26,15 +27,15 @@ final class PhoneNumberHandler implements RuleHandlerInterface
 {
     public const COUNTRIES_NONE = false;
     /**
-     * @var string {@link https://www.rfc-editor.org/rfc/rfc4933.html#section-2.5 Extensible Provisioning Protocol (EPP)
+     * {@link https://www.rfc-editor.org/rfc/rfc4933.html#section-2.5 Extensible Provisioning Protocol (EPP)
      * Contact Mapping Telephone Numbers}
      */
     public const I11L_FORMAT_EPP = 'EPP';
     /**
-     * @var string {@link https://www.itu.int/rec/T-REC-E.123 ITU-T Recommendation E.123
+     * {@link https://www.itu.int/rec/T-REC-E.123 ITU-T Recommendation E.123
      * (“Notation for national and i11l telephone numbers, e-mail addresses and Web addresses”)} and
-     * {@link https://www.itu.int/rec/T-REC-E.164 ITU-T Recommendation E.164 (“The international public
-     * telecommunication numbering plan”)}
+     * {@link https://www.itu.int/rec/T-REC-E.164 ITU-T Recommendation E.164
+     * (“The international public telecommunication numbering plan”)}
      */
     public const I11L_FORMAT_ITU = 'ITU';
     public const I11L_FORMAT_NONE = false;
@@ -46,7 +47,7 @@ final class PhoneNumberHandler implements RuleHandlerInterface
     /**
      * @var string Regex pattern to match ITU format phone numbers (also matches, but does not ensure, EPP numbers)
      */
-    private const ITU_PATTERN = '/^\+\d{1,3}[-. ](\d{2,6}([-. ])?){1,4}(?:(x|#).+)?$/';
+    private const ITU_PATTERN = '/^\+\d{1,3}[-. ](\d{2,6}([-. ])?){1,4}(?:([x#]).+)?$/';
     /**
      * @var int ITU-T Recommendation E.164 maximum international phone number length - excluding any extension
      */
@@ -56,13 +57,7 @@ final class PhoneNumberHandler implements RuleHandlerInterface
      */
     private const REMOVE_EXT_PATTERN = '/^(.+?)([x#].+)?$/';
 
-    /**
-     * @param mixed $value Phone number to validate
-     * @param ValidationContext $context Validation context
-     * @return Result Validation result
-     * @throws Exception
-     */
-    public function validate(mixed $value, object $rule, ValidationContext $context): Result
+    public function validate(mixed $value, RuleInterface $rule, ValidationContext $context): Result
     {
         if (!$rule instanceof PhoneNumber) {
             throw new UnexpectedRuleException(PhoneNumber::class, $rule);
@@ -70,10 +65,14 @@ final class PhoneNumberHandler implements RuleHandlerInterface
 
         $result = new Result();
         if (!is_string($value)) {
-            $result->addError($rule->getIncorrectInputMessage(), [
-                'attribute' => $context->getTranslatedAttribute(),
-                'type' => get_debug_type($value),
-            ]);
+            $result->addError(
+                $rule->getIncorrectInputMessage(),
+                [
+                    'attribute' => $context->getTranslatedProperty(),
+                    'type' => get_debug_type($value),
+                ],
+                ['phoneNumber']
+            );
 
             return $result;
         }
@@ -88,21 +87,25 @@ final class PhoneNumberHandler implements RuleHandlerInterface
         }
 
         if (!$validI11l && !$validN6l) {
-            if ($rule->getCountries()) {
+            if ($rule->getCountries() !== false) {
                 $result->addError(
-                    $rule->getInvalidN6lPhoneNumberMessage(), [
-                        'attribute' => $context->getTranslatedAttribute(),
+                    $rule->getInvalidN6lPhoneNumberMessage(),
+                    [
+                        'attribute' => $context->getTranslatedProperty(),
                         'value' => $value,
-                    ]
+                    ],
+                    ['phoneNumber', 'n6l']
                 );
             }
 
-            if ($rule->getI11l()) {
+            if ($rule->getI11l() !== false) {
                 $result->addError(
-                    $rule->getInvalidI11lPhoneNumberMessage(), [
-                        'attribute' => $context->getTranslatedAttribute(),
+                    $rule->getInvalidI11lPhoneNumberMessage(),
+                    [
+                        'attribute' => $context->getTranslatedProperty(),
                         'value' => $value,
-                    ]
+                    ],
+                    ['phoneNumber', 'i11l']
                 );
             }
         }
@@ -139,13 +142,18 @@ final class PhoneNumberHandler implements RuleHandlerInterface
      * @param string $value Phone number to validate
      * @return bool Whether the phone number is a valid national phone number
      * @throws RuntimeException
+     * @psalm-suppress PossiblyInvalidIterator, PossiblyNullReference
      */
     protected function isValidN6l(string $value, PhoneNumber $rule): bool
     {
         $n6lPhoneNumberData = $rule->getN6lPhoneNumberData();
 
+        /** @var string $country */
         foreach ($rule->getCountries() as $country) {
-            if (preg_match($n6lPhoneNumberData->getPattern($country), $value)) {
+            /** @psalm-var array<non-empty-string, non-empty-string> $n6l */
+            $n6l = $n6lPhoneNumberData->getN6l($country);
+
+            if (preg_match($n6l['pattern'], $value)) {
                 return true;
             }
         }
