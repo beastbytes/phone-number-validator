@@ -1,6 +1,6 @@
 <?php
 /**
- * @copyright Copyright (c) 2023 BeastBytes - All Rights Reserved
+ * @copyright Copyright (c) 2024 BeastBytes - All Rights Reserved
  * @license BSD 3-Clause
  */
 
@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace BeastBytes\PhoneNumber\Validator\Rule;
 
+use Attribute;
 use BeastBytes\PhoneNumber\N6l\N6lPhoneNumberDataInterface;
 use Closure;
 use InvalidArgumentException;
@@ -15,13 +16,13 @@ use JetBrains\PhpStorm\ArrayShape;
 use Yiisoft\Validator\Rule\Trait\SkipOnEmptyTrait;
 use Yiisoft\Validator\Rule\Trait\SkipOnErrorTrait;
 use Yiisoft\Validator\Rule\Trait\WhenTrait;
-use Yiisoft\Validator\RuleWithOptionsInterface;
+use Yiisoft\Validator\RuleInterface;
 use Yiisoft\Validator\SkipOnEmptyInterface;
 use Yiisoft\Validator\SkipOnErrorInterface;
 use Yiisoft\Validator\ValidationContext;
 use Yiisoft\Validator\WhenInterface;
 
-final class PhoneNumber implements RuleWithOptionsInterface, SkipOnEmptyInterface, SkipOnErrorInterface, WhenInterface
+final class PhoneNumber implements RuleInterface, SkipOnEmptyInterface, SkipOnErrorInterface, WhenInterface
 {
     use SkipOnEmptyTrait;
     use SkipOnErrorTrait;
@@ -31,7 +32,6 @@ final class PhoneNumber implements RuleWithOptionsInterface, SkipOnEmptyInterfac
     public const INVALID_I11L_FORMAT_MESSAGE = 'Invalid international format; must be "EPP" or "ITU".';
     public const INVALID_I11L_PHONE_NUMBER_MESSAGE = '{value} is not a valid international phone number.';
     public const INVALID_N6L_PHONE_NUMBER_MESSAGE = '{value} is not a valid national phone number.';
-    public const NAME = 'phoneNumber';
     public const COUNTRIES_OR_I11L_NOT_FALSE_EXCEPTION_MESSAGE
         = 'At least one of $countries or $i11l must not be false';
     public const N6L_DATA_NOT_NULL_EXCEPTION_MESSAGE
@@ -70,19 +70,19 @@ final class PhoneNumber implements RuleWithOptionsInterface, SkipOnEmptyInterfac
      */
 
     public function __construct(
-        private ?N6lPhoneNumberDataInterface $n6lPhoneNumberData = null,
+        private readonly ?N6lPhoneNumberDataInterface $n6lPhoneNumberData = null,
         private bool|array|string $countries = PhoneNumberHandler::COUNTRIES_NONE,
         private bool|string $i11l = PhoneNumberHandler::I11L_FORMAT_NONE,
-        private string $incorrectInputMessage = self::INCORRECT_INPUT_MESSAGE,
-        private string $invalidI11lFormatMessage = self::INVALID_I11L_FORMAT_MESSAGE,
-        private string $invalidI11lPhoneNumberMessage = self::INVALID_I11L_PHONE_NUMBER_MESSAGE,
-        private string $invalidN6lPhoneNumberMessage = self::INVALID_N6L_PHONE_NUMBER_MESSAGE,
-        private mixed $skipOnEmpty = null,
-        private bool $skipOnError = false,
+        private readonly string      $incorrectInputMessage = self::INCORRECT_INPUT_MESSAGE,
+        private readonly string      $invalidI11lFormatMessage = self::INVALID_I11L_FORMAT_MESSAGE,
+        private readonly string      $invalidI11lPhoneNumberMessage = self::INVALID_I11L_PHONE_NUMBER_MESSAGE,
+        private readonly string      $invalidN6lPhoneNumberMessage = self::INVALID_N6L_PHONE_NUMBER_MESSAGE,
+        bool|callable|null           $skipOnEmpty = null,
+        private readonly bool        $skipOnError = false,
         /**
          * @var Closure(mixed, ValidationContext):bool|null $when
          */
-        private ?Closure $when = null,
+        private readonly ?Closure    $when = null,
     ) {
         if ($this->countries !== false && $this->n6lPhoneNumberData === null) {
             throw new InvalidArgumentException(self::N6L_DATA_NOT_NULL_EXCEPTION_MESSAGE);
@@ -92,12 +92,14 @@ final class PhoneNumber implements RuleWithOptionsInterface, SkipOnEmptyInterfac
             throw new InvalidArgumentException(self::COUNTRIES_NOT_FALSE_EXCEPTION_MESSAGE);
         }
 
+        /** @psalm-suppress PossiblyNullReference */
         if (is_string($this->countries)) {
             $this->countries = [$this->countries];
         } elseif ($this->countries === true) {
             $this->countries = $this->n6lPhoneNumberData->getCountries();
         }
 
+        /** @psalm-suppress PossiblyNullReference */
         if (is_array($this->countries)) {
             foreach ($this->countries as $country) {
                 if (!$this->n6lPhoneNumberData->hasCountry($country)) {
@@ -121,6 +123,8 @@ final class PhoneNumber implements RuleWithOptionsInterface, SkipOnEmptyInterfac
                 throw new InvalidArgumentException(self::INVALID_I11L_FORMAT_MESSAGE);
             }
         }
+
+        $this->skipOnEmpty = $skipOnEmpty;
     }
 
     public function getIncorrectInputMessage(): string
@@ -138,7 +142,7 @@ final class PhoneNumber implements RuleWithOptionsInterface, SkipOnEmptyInterfac
         return $this->invalidN6lPhoneNumberMessage;
     }
 
-    public function getCountries(): bool|array
+    public function getCountries(): bool|array|string
     {
         return $this->countries;
     }
@@ -148,14 +152,14 @@ final class PhoneNumber implements RuleWithOptionsInterface, SkipOnEmptyInterfac
         return $this->i11l;
     }
 
-    public function getN6lPhoneNumberData(): N6lPhoneNumberDataInterface
+    public function getN6lPhoneNumberData(): ?N6lPhoneNumberDataInterface
     {
         return $this->n6lPhoneNumberData;
     }
 
     public function getName(): string
     {
-        return self::NAME;
+        return self::class;
     }
 
     #[ArrayShape([
