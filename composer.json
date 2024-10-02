@@ -23,11 +23,11 @@
   "minimum-stability": "dev",
   "prefer-stable": true,
   "require": {
-    "php": "^8.0",
-    "yiisoft/validator": "^1.0"
+    "php": "^8.1",
+    "yiisoft/validator": "^2.0"
   },
   "require-dev": {
-    "beastbytes/n6l-phone-number-data-php": "dev-master",
+    "beastbytes/n6l-phone-number-data-php": "^2.0",
     "consolidation/robo": "^4.0",
     "phpunit/phpunit": "^10.0",
     "roave/infection-static-analysis-plugin": "^1.0",
@@ -53,5 +53,10 @@
     "robo": "robo",
     "test": "phpunit --testdox",
     "test-watch": "phpunit-watcher watch"
+  },
+  "config": {
+    "allow-plugins": {
+      "infection/extension-installer": true
+    }
   }
 }
