@@ -9,7 +9,8 @@
     "itu",
     "itu-t",
     "E.123",
-    "E.164"
+    "E.164",
+    "yii2"
   ],
   "support": {
     "issues": "https://github.com/beastbytes/phone-number-validator/issues",
